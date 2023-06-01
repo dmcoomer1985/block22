@@ -33,6 +33,18 @@ const getPartyById = async (id) => {
 // delete party
 const deleteParty = async (id) => {
   // your code here
+  //send a Delete api call by id
+  console.log('deleting ' + id);
+  try {
+    const requestOptions = {
+      method: 'DELETE'
+    }
+    const response = await fetch(`${PARTIES_API_URL}/${id}`, requestOptions);
+    const party = await response.json();
+    return party;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 // render a single party by id
@@ -80,17 +92,34 @@ const renderSinglePartyById = async (id) => {
 
             <button class="close-button">Close</button>
         `;
-    partyContainer.appendChild(partyDetailsElement);
+
+        //hide the party list container
+        partyListContainer.style.display = 'none'
+   
+        // put the party details on the page ( in the container )
+        partyContainer.appendChild(partyDetailsElement);
 
     // add event listener to close button
     const closeButton = partyDetailsElement.querySelector('.close-button');
     closeButton.addEventListener('click', () => {
       partyDetailsElement.remove();
+      partyListContainer.style.display = 'flex'
     });
   } catch (error) {
     console.error(error);
   }
 };
+
+const getRandomColor = () => {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+
 
 // render all parties
 const renderParties = async (parties) => {
@@ -113,13 +142,21 @@ const renderParties = async (parties) => {
       // see details
       const detailsButton = partyElement.querySelector('.details-button');
       detailsButton.addEventListener('click', async (event) => {
-        // your code here
+        // get the id
+        const partyID = event.target.dataset.id
+        // send id to renderSinglePartyById function
+        renderSinglePartyById(partyId)
       });
 
       // delete party
       const deleteButton = partyElement.querySelector('.delete-button');
       deleteButton.addEventListener('click', async (event) => {
-        // your code here
+        // get the id
+        const partyId = event.target.dataset.id
+        // pass the id to deleteParty function
+        deleteParty(partyId)
+        //get it off the page
+        event.target.closest('div.party').remove()
       });
     });
   } catch (error) {
@@ -130,7 +167,7 @@ const renderParties = async (parties) => {
 // init function
 const init = async () => {
   const parties = await getAllParties()
-  renderParties(parties)
+  renderParties(parties) // <----- put parties in here as an argument. 
 };
 
 init();
